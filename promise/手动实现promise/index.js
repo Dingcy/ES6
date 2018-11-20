@@ -80,7 +80,7 @@
 // })
 
 
-// promise是有状态的，而且状态不可逆，同样的为了简单起见，我先来搞定从pending变到resolved，那么rejected也一样。
+// promise是有状态的，而且状态不可逆，同样的为了简单起见，先来搞定从pending变到resolved，那么rejected也一样。
 // 仔细想下，执行了resolve方法后可以得到一个resolved状态的值，那么必然在resolve方法中会去改变promise的状态，
 // 并且得到这个值，那么代码貌似应该这样写：
 
@@ -92,6 +92,68 @@ function Promise(fn) {
     }
     this.then = function (onResolved) {
         callback = onResolved;
+    }
+    fn(resolve);
+ }
+
+//  这里我们先把setTimeout这家伙给干掉了，因为我们加入了状态，也就意味我们是想通过状态的变化来知道能不能得到值，
+//  那么问题来了，我们不知道状态啥时候变，而我们现在要做的就是创造这么个机会
+ function Promise(fn) {
+    var state = 'pending';
+    var value;
+    var deferred;
+    function resolve(newValue) {
+        value = newValue;
+        state = 'resolved'; 
+        if(deferred){
+            handle(deferred);
+        }
+    }
+    function handle(onResolved) {
+        if(state === 'pending'){
+            deferred = onResolved;
+            return ;
+        }
+        onResolved(value);
+    }
+    this.then = function (onResolved) {
+        callback = onResolved;
+    }
+    fn(resolve);
+ }
+
+
+// 解决链式调用，在then方法中返回一个promise
+function Promise(fn) {
+    var state = 'pending';
+    var value;
+    var deferred;
+    function resolve(newValue) {
+        value = newValue;
+        state = 'resolved'; 
+        if(deferred){
+            handle(deferred);
+        }
+    }
+    function handle(onResolved) {
+        if(state === 'pending'){
+            deferred = handler;
+            return ;
+        }
+        if(!handler.onResolved){
+           handler.resolve(value);
+            return ;
+        }
+        var ret = handler.onResolved(value);
+        handler.resolve(ret);
+    }
+    this.then = function (onResolved) {
+        return new Promise(function (resolved) {
+            handle({
+                onResolved,
+                resolve
+            })
+        })
     }
     fn(resolve);
  }
