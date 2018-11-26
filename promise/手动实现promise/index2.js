@@ -11,36 +11,36 @@
 //     }
 // );
 
-
-// function Promise(fn) {
-//     function resolve(value) {
+// 简版
+function Promise(fn) {
+    function resolve(value) {
         
-//     }
-//     function reject(value) {
+    }
+    function reject(value) {
         
-//     }
-//     fn(resolve,reject)
-// }
+    }
+    fn(resolve,reject)
+}
 
-
-// function Promise(fn) {
-//     var value = null,succallbacks = [],failallbacks = [];
-//     this.then = function (fulfilled,rejected) {
-//         succallbacks.push(fulfilled);
-//         failallbacks.push(rejected);
-//     }
-//     function resolve(value) {
-//         succallbacks.forEach((callback) => {
-//             callback(value)
-//         })
-//     }
-//     function reject(value) {
-//         failcallbacks.forEach((callback) => {
-//             callback(value);
-//         })
-//     }
-//     fn(resolve,reject)
-// }
+// 加入回调
+function Promise(fn) {
+    var value = null,succallbacks = [],failallbacks = [];
+    this.then = function (fulfilled,rejected) {
+        succallbacks.push(fulfilled);
+        failallbacks.push(rejected);
+    }
+    function resolve(value) {
+        succallbacks.forEach((callback) => {
+            callback(value)
+        })
+    }
+    function reject(value) {
+        failcallbacks.forEach((callback) => {
+            callback(value);
+        })
+    }
+    fn(resolve,reject)
+}
 
 // 链式调用
 function Promise(fn) {
